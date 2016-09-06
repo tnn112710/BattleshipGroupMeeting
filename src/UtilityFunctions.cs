@@ -1,10 +1,17 @@
-
 using Microsoft.VisualBasic;
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Data;
 using System.Diagnostics;
+using SwinGameSDK;
+using static GameController;
+using static GameResources;
+using static DeploymentController;
+using static DiscoveryController;
+using static EndingGameController;
+using static MenuController;
+using static HighScoreController;
+
 /// <summary>
 /// This includes a number of utility methods for
 /// drawing and interacting with the Mouse.
@@ -14,7 +21,6 @@ static class UtilityFunctions
     public const int FIELD_TOP = 122;
     public const int FIELD_LEFT = 349;
     public const int FIELD_WIDTH = 418;
-
     public const int FIELD_HEIGHT = 418;
 
     public const int MESSAGE_TOP = 548;
@@ -22,8 +28,8 @@ static class UtilityFunctions
     public const int CELL_HEIGHT = 40;
 
     public const int CELL_GAP = 2;
-
     public const int SHIP_GAP = 3;
+
     private static readonly Color SMALL_SEA = SwinGame.RGBAColor(6, 60, 94, 255);
     private static readonly Color SMALL_SHIP = Color.Gray;
     private static readonly Color SMALL_MISS = SwinGame.RGBAColor(1, 147, 220, 255);
@@ -39,9 +45,10 @@ static class UtilityFunctions
     private static readonly Color SHIP_OUTLINE_COLOR = Color.White;
 
     private static readonly Color MESSAGE_COLOR = SwinGame.RGBAColor(2, 167, 252, 255);
-    public const int ANIMATION_CELLS = 7;
 
+    public const int ANIMATION_CELLS = 7;
     public const int FRAMES_PER_CELL = 8;
+
     /// <summary>
     /// Determines if the mouse is in a given rectangle.
     /// </summary>
@@ -87,8 +94,8 @@ static class UtilityFunctions
     /// <param name="thePlayer">the player to show the ships of</param>
     public static void DrawSmallField(ISeaGrid grid, Player thePlayer)
     {
-        const int SMALL_FIELD_LEFT = 39;
-        const int SMALL_FIELD_TOP = 373;
+        const int SMALL_FIELD_LEFT = 92  ;
+        const int SMALL_FIELD_TOP = 328  ;
         const int SMALL_FIELD_WIDTH = 166;
         const int SMALL_FIELD_HEIGHT = 166;
         const int SMALL_FIELD_CELL_WIDTH = 13;
@@ -104,7 +111,8 @@ static class UtilityFunctions
     /// </summary>
     /// <param name="grid">the grid to show</param>
     /// <param name="thePlayer">the player to show the ships of</param>
-    /// <param name="small">true if the small grid is shown</param>
+    /// <param name="small">true if the small grid is shown</param>run.sh
+
     /// <param name="showShips">true if ships are to be shown</param>
     /// <param name="left">the left side of the grid</param>
     /// <param name="top">the top of the grid</param>
@@ -133,7 +141,7 @@ static class UtilityFunctions
 
                 draw = true;
 
-                switch (grid.Item(row, col)) {
+                switch (grid[row, col]) {
                     case TileView.Ship:
                         draw = false;
                         break;
@@ -151,7 +159,6 @@ static class UtilityFunctions
                             fillColor = LARGE_HIT;
                         break;
                     case TileView.Sea:
-                    case TileView.Ship:
                         if (small)
                             fillColor = SMALL_SEA;
                         else
@@ -161,6 +168,36 @@ static class UtilityFunctions
 
                 if (draw) {
                     SwinGame.FillRectangle(fillColor, colLeft, rowTop, cellWidth, cellHeight);
+					//Draw the ships
+                    int shipHeight1 = 0;
+                    int shipWidth1 = 0;
+                    string shipName1 = null;
+                    foreach (Ship s in thePlayer)
+                    {
+                        if (s == null || !s.IsDestroyed)
+                            continue;
+                        int rowTop1 = top + (cellGap + cellHeight) * s.Row + SHIP_GAP;
+                        int colLeft1 = left + (cellGap + cellWidth) * s.Column + SHIP_GAP;
+
+                        if (s.Direction == Direction.LeftRight)
+                        {
+                            shipName1 = "ShipLR" + s.Size;
+                            shipHeight1 = cellHeight - (SHIP_GAP * 2);
+                            shipWidth1 = (cellWidth + cellGap) * s.Size - (SHIP_GAP * 2) - cellGap;
+                        }
+                        else
+                        {
+                            //Up down
+                            shipName1 = "ShipUD" + s.Size;
+                            shipHeight1 = (cellHeight + cellGap) * s.Size - (SHIP_GAP * 2) - cellGap;
+                            shipWidth1 = cellWidth - (SHIP_GAP * 2);
+                        }
+
+                        if (!small)
+                        {
+                            SwinGame.DrawBitmap(GameImage(shipName1), colLeft1, rowTop1);
+                        }
+                    }
                     if (!small) {
                         SwinGame.DrawRectangle(OUTLINE_COLOR, colLeft, rowTop, cellWidth, cellHeight);
                     }
@@ -234,6 +271,7 @@ static class UtilityFunctions
             case GameState.ViewingGameMenu:
             case GameState.AlteringSettings:
             case GameState.ViewingHighScores:
+            case GameState.QuitConfirm:
                 SwinGame.DrawBitmap(GameImage("Menu"), 0, 0);
                 break;
             case GameState.Discovering:
@@ -248,7 +286,7 @@ static class UtilityFunctions
                 break;
         }
 
-        SwinGame.DrawFramerate(675, 585, GameFont("CourierSmall"));
+        //SwinGame.DrawFramerate(675, 585, GameFont("CourierSmall"));
     }
 
     public static void AddExplosion(int row, int col)
@@ -287,7 +325,7 @@ static class UtilityFunctions
         List<Sprite> ended = new List<Sprite>();
         foreach (Sprite s in _Animations) {
             SwinGame.UpdateSprite(s);
-            if (s.animationHasEnded) {
+            if (s.AnimationHasEnded) {
                 ended.Add(s);
             }
         }
@@ -314,10 +352,3 @@ static class UtilityFunctions
         }
     }
 }
-
-//=======================================================
-//Service provided by Telerik (www.telerik.com)
-//Conversion powered by NRefactory.
-//Twitter: @telerik
-//Facebook: facebook.com/telerik
-//=======================================================

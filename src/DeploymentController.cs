@@ -1,11 +1,16 @@
-
 using Microsoft.VisualBasic;
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Data;
 using System.Diagnostics;
 using SwinGameSDK;
+using static GameController;
+using static UtilityFunctions;
+using static GameResources;
+using static DiscoveryController;
+using static EndingGameController;
+using static MenuController;
+using static HighScoreController;
 
 /// <summary>
 /// The DeploymentController controls the players actions
@@ -15,50 +20,45 @@ static class DeploymentController
 {
     private const int SHIPS_TOP = 98;
     private const int SHIPS_LEFT = 20;
+    private const int SHIPS_RIGHT = 320;
     private const int SHIPS_HEIGHT = 90;
-
     private const int SHIPS_WIDTH = 300;
     private const int TOP_BUTTONS_TOP = 72;
-
     private const int TOP_BUTTONS_HEIGHT = 46;
     private const int PLAY_BUTTON_LEFT = 693;
-
     private const int PLAY_BUTTON_WIDTH = 80;
     private const int UP_DOWN_BUTTON_LEFT = 410;
-
     private const int LEFT_RIGHT_BUTTON_LEFT = 350;
     private const int RANDOM_BUTTON_LEFT = 547;
-
     private const int RANDOM_BUTTON_WIDTH = 51;
-
     private const int DIR_BUTTONS_WIDTH = 47;
-
     private const int TEXT_OFFSET = 5;
-    private static Direction _currentDirection = Direction.UpDown;
 
+    private static Direction _currentDirection = Direction.UpDown;
     private static ShipName _selectedShip = ShipName.Tug;
+
     /// <summary>
     /// Handles user input for the Deployment phase of the game.
     /// </summary>
     /// <remarks>
-    /// Involves selecting the ships, deloying ships, changing the direction
-    /// of the ships to add, randomising deployment, end then ending
+    /// Involves selecting the ships, deploying ships, changing the direction
+    /// of the ships to add, randomizing deployment, end then ending
     /// deployment
     /// </remarks>
     public static void HandleDeploymentInput()
     {
-        if (SwinGame.KeyTyped(KeyCode.VK_ESCAPE)) {
+        if (SwinGame.KeyTyped(KeyCode.vk_ESCAPE)) {
             AddNewState(GameState.ViewingGameMenu);
         }
 
-        if (SwinGame.KeyTyped(KeyCode.VK_UP) | SwinGame.KeyTyped(KeyCode.VK_DOWN)) {
+        if (SwinGame.KeyTyped(KeyCode.vk_UP) | SwinGame.KeyTyped(KeyCode.vk_DOWN)) {
             _currentDirection = Direction.UpDown;
         }
-        if (SwinGame.KeyTyped(KeyCode.VK_LEFT) | SwinGame.KeyTyped(KeyCode.VK_RIGHT)) {
+        if (SwinGame.KeyTyped(KeyCode.vk_LEFT) | SwinGame.KeyTyped(KeyCode.vk_RIGHT)) {
             _currentDirection = Direction.LeftRight;
         }
 
-        if (SwinGame.KeyTyped(KeyCode.VK_R)) {
+        if (SwinGame.KeyTyped(KeyCode.vk_r)) {
             HumanPlayer.RandomizeDeployment();
         }
 
@@ -74,7 +74,7 @@ static class DeploymentController
             if (HumanPlayer.ReadyToDeploy & IsMouseInRectangle(PLAY_BUTTON_LEFT, TOP_BUTTONS_TOP, PLAY_BUTTON_WIDTH, TOP_BUTTONS_HEIGHT)) {
                 EndDeployment();
             } else if (IsMouseInRectangle(UP_DOWN_BUTTON_LEFT, TOP_BUTTONS_TOP, DIR_BUTTONS_WIDTH, TOP_BUTTONS_HEIGHT)) {
-                _currentDirection = Direction.LeftRight;
+                _currentDirection = Direction.UpDown;
             } else if (IsMouseInRectangle(LEFT_RIGHT_BUTTON_LEFT, TOP_BUTTONS_TOP, DIR_BUTTONS_WIDTH, TOP_BUTTONS_HEIGHT)) {
                 _currentDirection = Direction.LeftRight;
             } else if (IsMouseInRectangle(RANDOM_BUTTON_LEFT, TOP_BUTTONS_TOP, RANDOM_BUTTON_WIDTH, TOP_BUTTONS_HEIGHT)) {
@@ -94,13 +94,12 @@ static class DeploymentController
     private static void DoDeployClick()
     {
         Point2D mouse = default(Point2D);
-
         mouse = SwinGame.MousePosition();
 
         //Calculate the row/col clicked
         int row = 0;
         int col = 0;
-        row = Convert.ToInt32(Math.Floor((mouse.Y) / (CELL_HEIGHT + CELL_GAP)));
+        row = Convert.ToInt32(Math.Floor((mouse.Y - FIELD_TOP) / (CELL_HEIGHT + CELL_GAP)));
         col = Convert.ToInt32(Math.Floor((mouse.X - FIELD_LEFT) / (CELL_WIDTH + CELL_GAP)));
 
         if (row >= 0 & row < HumanPlayer.PlayerGrid.Height) {
@@ -138,13 +137,23 @@ static class DeploymentController
         //DrawShips
         foreach (ShipName sn in Enum.GetValues(typeof(ShipName))) {
             int i = 0;
-            i = Conversion.Int(sn) - 1;
+            i = ((int) sn) - 1;
             if (i >= 0) {
                 if (sn == _selectedShip) {
+
+                    String boatName = Convert.ToString(sn);
+
+                    if (boatName == "AircraftCarrier")
+                    {
+                    	boatName = "Aircraft Carrier";
+                    }
+
                     SwinGame.DrawBitmap(GameImage("SelectedShip"), SHIPS_LEFT, SHIPS_TOP + i * SHIPS_HEIGHT);
-                    //    SwinGame.FillRectangle(Color.LightBlue, SHIPS_LEFT, SHIPS_TOP + i * SHIPS_HEIGHT, SHIPS_WIDTH, SHIPS_HEIGHT)
+                    SwinGame.DrawTextLines(boatName, Color.White, SwinGame.RGBAColor(0, 0, 0, 0), GameFont("DeployName"), SwinGame.TextAlignmentFrom("r"), SHIPS_LEFT + 20, SHIPS_TOP + i * SHIPS_HEIGHT + 16, 250, 600);
+                    
+                    // SwinGame.FillRectangle(Color.LightBlue, SHIPS_LEFT, SHIPS_TOP + i * SHIPS_HEIGHT, SHIPS_WIDTH, SHIPS_HEIGHT)
                     //Else
-                    //    SwinGame.FillRectangle(Color.Gray, SHIPS_LEFT, SHIPS_TOP + i * SHIPS_HEIGHT, SHIPS_WIDTH, SHIPS_HEIGHT)
+                    // SwinGame.FillRectangle(Color.Gray, SHIPS_LEFT, SHIPS_TOP + i * SHIPS_HEIGHT, SHIPS_WIDTH, SHIPS_HEIGHT)
                 }
 
                 //SwinGame.DrawRectangle(Color.Black, SHIPS_LEFT, SHIPS_TOP + i * SHIPS_HEIGHT, SHIPS_WIDTH, SHIPS_HEIGHT)
@@ -172,20 +181,15 @@ static class DeploymentController
     {
         foreach (ShipName sn in Enum.GetValues(typeof(ShipName))) {
             int i = 0;
-            i = Conversion.Int(sn) - 1;
+            i = ((int) sn) - 1;
 
             if (IsMouseInRectangle(SHIPS_LEFT, SHIPS_TOP + i * SHIPS_HEIGHT, SHIPS_WIDTH, SHIPS_HEIGHT)) {
+
                 return sn;
             }
         }
 
         return ShipName.None;
     }
-}
 
-//=======================================================
-//Service provided by Telerik (www.telerik.com)
-//Conversion powered by NRefactory.
-//Twitter: @telerik
-//Facebook: facebook.com/telerik
-//=======================================================
+}

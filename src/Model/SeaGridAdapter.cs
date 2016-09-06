@@ -1,10 +1,9 @@
-
 using Microsoft.VisualBasic;
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Data;
 using System.Diagnostics;
+
 /// <summary>
 /// The SeaGridAdapter allows for the change in a sea grid view. Whenever a ship is
 /// presented it changes the view into a sea tile instead of a ship tile.
@@ -44,9 +43,9 @@ public class SeaGridAdapter : ISeaGrid
     /// <param name="x">tile x coordinate</param>
     /// <param name="y">tile y coordinate</param>
     /// <returns>a tile, either what it actually is, or if it was a ship then return a sea tile</returns>
-    public TileView Item {
+    public TileView this[int x, int y] {
         get {
-            TileView result = _MyGrid.Item(x, y);
+            TileView result = _MyGrid[x, y];
 
             if (result == TileView.Ship) {
                 return TileView.Sea;
@@ -59,7 +58,7 @@ public class SeaGridAdapter : ISeaGrid
     /// <summary>
     /// Indicates that the grid has been changed
     /// </summary>
-    public event EventHandler ISeaGrid.Changed;
+    public event EventHandler Changed;
 
     /// <summary>
     /// Get the width of a tile
@@ -88,10 +87,3 @@ public class SeaGridAdapter : ISeaGrid
     #endregion
 
 }
-
-//=======================================================
-//Service provided by Telerik (www.telerik.com)
-//Conversion powered by NRefactory.
-//Twitter: @telerik
-//Facebook: facebook.com/telerik
-//=======================================================

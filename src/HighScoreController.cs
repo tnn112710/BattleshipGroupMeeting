@@ -1,12 +1,17 @@
-
 using Microsoft.VisualBasic;
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Data;
 using System.Diagnostics;
 using System.IO;
 using SwinGameSDK;
+using static GameController;
+using static UtilityFunctions;
+using static GameResources;
+using static DeploymentController;
+using static DiscoveryController;
+using static EndingGameController;
+using static MenuController;
 
 /// <summary>
 /// Controls displaying and collecting high score data.
@@ -16,7 +21,7 @@ using SwinGameSDK;
 /// </remarks>
 static class HighScoreController
 {
-    private const int NAME_WIDTH = 3;
+    private const int NAME_WIDTH = 8;
 
     private const int SCORES_LEFT = 490;
     /// <summary>
@@ -126,13 +131,14 @@ static class HighScoreController
             LoadScores();
 
         SwinGame.DrawText("   High Scores   ", Color.White, GameFont("Courier"), SCORES_LEFT, SCORES_HEADING);
+        SwinGame.DrawBitmap(GameImage("Back"), 50, 500);  // Added line of code to draw back button
 
         //For all of the scores
         int i = 0;
         for (i = 0; i <= _Scores.Count - 1; i++) {
             Score s = default(Score);
 
-            s = _Scores.Item(i);
+            s = _Scores[i];
 
             //for scores 1 - 9 use 01 - 09
             if (i < 9) {
@@ -149,8 +155,9 @@ static class HighScoreController
     /// <remarks></remarks>
     public static void HandleHighScoreInput()
     {
-        if (SwinGame.MouseClicked(MouseButton.LeftButton) || SwinGame.KeyTyped(KeyCode.VK_ESCAPE) || SwinGame.KeyTyped(KeyCode.VK_RETURN)) {
-            EndCurrentState();
+        if (SwinGame.MouseClicked(MouseButton.LeftButton) & IsMouseInRectangle(50, 500, 119, 46))
+        {
+           	EndCurrentState();
         }
     }
 
@@ -169,7 +176,7 @@ static class HighScoreController
             LoadScores();
 
         //is it a high score
-        if (value > _Scores.Item(_Scores.Count - 1).Value) {
+        if (value > _Scores[_Scores.Count - 1].Value) {
             Score s = new Score();
             s.Value = value;
 
@@ -186,7 +193,7 @@ static class HighScoreController
 
                 DrawBackground();
                 DrawHighScores();
-                SwinGame.DrawText("Name: ", Color.White, GameFont("Courier"), SCORES_LEFT, ENTRY_TOP);
+                SwinGame.DrawText("Name: ", Color.White, GameFont("Courier"), SCORES_LEFT, ENTRY_TOP);                
                 SwinGame.RefreshScreen();
             }
 
@@ -204,10 +211,3 @@ static class HighScoreController
         }
     }
 }
-
-//=======================================================
-//Service provided by Telerik (www.telerik.com)
-//Conversion powered by NRefactory.
-//Twitter: @telerik
-//Facebook: facebook.com/telerik
-//=======================================================
