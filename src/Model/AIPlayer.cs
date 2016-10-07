@@ -59,18 +59,41 @@ public abstract class AIPlayer : Player
         /// <param name="other">location 2</param>
         /// <returns>true if location 1 and location 2 are at the same spot</returns>
         public static bool operator ==(Location @this, Location other)
+
+
+
+
         {
             if(ReferenceEquals(null, @this) || ReferenceEquals(null, other))
             {
                 return false;
             }
 
+
+
+
+
+
+
+
+
             if(ReferenceEquals(@this.Row, other.Row) && ReferenceEquals(@this.Column, other.Column))
+
+
             {
                 return true;
             }
 
             return @this.Equals(other);
+
+
+
+
+
+
+
+
+
 
 
             //return @this != null && other != null && @this.Row == other.Row && @this.Column == other.Column;
