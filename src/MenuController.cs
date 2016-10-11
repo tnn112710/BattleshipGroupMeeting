@@ -41,6 +41,7 @@ static class MenuController
         },
         new string[] {
             "EASY",
+            "MEDIUM",
             "HARD"
         },
         new string[] {
