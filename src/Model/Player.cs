@@ -4,6 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 
+
 /// <summary>
 /// Player has its own _PlayerGrid, and can see an _EnemyGrid, it can also check if
 /// all ships are deployed and if all ships are detroyed. A Player can also attach.
@@ -176,27 +177,32 @@ public class Player : IEnumerable<Ship>
     /// <param name="row">the row to attack</param>
     /// <param name="col">the column to attack</param>
     /// <returns>the result of the attack</returns>
-    internal AttackResult Shoot(int row, int col)
+    public AttackResult Shoot(int row, int col)
     {
-        _shots += 1;
+        
         AttackResult result = default(AttackResult);
         result = EnemyGrid.HitTile(row, col);
 
         switch (result.Value) {
             case ResultOfAttack.Destroyed:
             case ResultOfAttack.Hit:
+                _shots += 1;
                 _hits += 1;
                 break;
             case ResultOfAttack.Miss:
+                _shots += 1;
                 _misses += 1;
                 break;
 			case ResultOfAttack.ShotAlready:
-                _misses += 1;
                 break;
         }
 
+       
+
         return result;
     }
+
+
 
     public virtual void RandomizeDeployment()
     {
