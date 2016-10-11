@@ -191,7 +191,7 @@ public class Player : IEnumerable<Ship>
                 _misses += 1;
                 break;
 			case ResultOfAttack.ShotAlready:
-                _misses += 1;
+                _misses ++;
                 break;
         }
 
