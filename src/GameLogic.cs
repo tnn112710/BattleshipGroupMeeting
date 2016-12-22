@@ -20,6 +20,9 @@ static class GameLogic
 		//Opens a new Graphics Window
 		SwinGame.OpenGraphicsWindow("Battle Ships", 800, 600);
 
+		//Show SwinGame Splash Screen
+		SwinGame.ShowSwinGameSplashScreen ();
+
 		//Load Resources
 		LoadResources();
 
