@@ -229,9 +229,27 @@ public static class GameController
 	/// </remarks>
 	public static void Attack(int row, int col)
 	{
-		AttackResult result = default(AttackResult);
+		if (isClicked (row, col)) 
+		{
+			return;
+		}
+
+		clickedPoints.Add (new Point(row, col));
+        AttackResult result = default(AttackResult);
 		result = _theGame.Shoot(row, col);
 		CheckAttackResult(result);
+	}
+
+
+	private static bool isClicked (int row, int col)
+	{
+		foreach (var point in clickedPoints) {
+			if (point.X == row && point.Y == col) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	/// <summary>
